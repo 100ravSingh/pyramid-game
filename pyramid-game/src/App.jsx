@@ -1,37 +1,46 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+
 import Footer from "./components/Footer";
-
-import RIDDLES from "./riddle";
-import { ROW_BLOCKS, ROW_POINTS } from "./pyramidConfig";
-
 import Pyramid from "./components/Pyramid";
 import Scoreboard from "./components/Scoreboard";
 import RiddleModal from "./components/RiddleModal";
 
+import RIDDLE_LAYERS from "./riddleLayers";  // NEW
+import { ROW_BLOCKS, ROW_POINTS } from "./pyramidConfig";
 
-// ------------------ CREATE BLOCKS ------------------
+
+// ------------------ CREATE BLOCKS (with layer-wise riddles) ------------------
 function createBlocks() {
   let blocks = [];
   let id = 1;
-  let rid = 0;
 
   ROW_BLOCKS.forEach((count, rowIndex) => {
     const row = [];
+
+    // Copy riddles for this layer so we can remove after assignment
+    let available = [...RIDDLE_LAYERS[`layer${rowIndex}`]];
+
     for (let i = 0; i < count; i++) {
-      const r = RIDDLES[rid % RIDDLES.length];
+      const randomIndex = Math.floor(Math.random() * available.length);
+      const r = available[randomIndex];
+      available.splice(randomIndex, 1); // remove to avoid repetition
+
       row.push({
         id: id++,
         rowIndex,
-        question: r.question,
-        answer: r.answer.toLowerCase(),
+        question: r.q,
+        answer: r.a.toLowerCase(),
         points: ROW_POINTS[rowIndex],
+
         used: false,
-        status: null, // teamA, teamB, wrong
-        randomNumber: String(Math.floor(Math.random() * 99) + 1).padStart(2, "0") // NEW
+        status: null,    // teamA, teamB, wrong
+
+        // random number 01–99
+        randomNumber: String(Math.floor(Math.random() * 99) + 1).padStart(2, "0"),
       });
-      rid++;
     }
+
     blocks.push(row);
   });
 
@@ -40,14 +49,15 @@ function createBlocks() {
 
 
 
-// ------------------ MAIN APP ------------------
+// ------------------ MAIN APP COMPONENT ------------------
 export default function App() {
 
-  // Detect first-time launch
+  // Detect first launch → so initial scores are 0:0
   const isFirstLaunch = localStorage.getItem("firstTime") === null;
 
 
-  // ------------ TEAM SCORES (persistent) ------------
+
+  // ------------------ TEAM SCORES (persistent) ------------------
   const [teams, setTeams] = useState(() => {
     const saved = localStorage.getItem("teamsScores");
 
@@ -55,6 +65,7 @@ export default function App() {
       return JSON.parse(saved);
     }
 
+    // first ever visit
     if (isFirstLaunch) {
       localStorage.setItem("firstTime", "no");
     }
@@ -71,7 +82,7 @@ export default function App() {
 
 
 
-  // ------------ PYRAMID STATE (persistent) ------------
+  // ------------------ PYRAMID BLOCKS (persistent) ------------------
   const [pyramid, setPyramid] = useState(() => {
     const saved = localStorage.getItem("pyramidState");
     return saved ? JSON.parse(saved) : createBlocks();
@@ -83,7 +94,7 @@ export default function App() {
 
 
 
-  // ------------ OTHER STATES ------------
+  // ------------------ STATES ------------------
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
 
   const [selectedBlockId, setSelectedBlockId] = useState(null);
@@ -98,13 +109,13 @@ export default function App() {
 
 
 
-  // ------------ SWITCH TEAM ------------
+  // ------------------ TEAM SWITCH ------------------
   const switchTeam = () =>
     setActiveTeamIndex((prev) => (prev === 0 ? 1 : 0));
 
 
 
-  // ------------ BLOCK CLICK ------------
+  // ------------------ BLOCK CLICK ------------------
   const handleBlockClick = (block) => {
     if (block.used) return;
 
@@ -116,7 +127,7 @@ export default function App() {
 
 
 
-  // ------------ SUBMIT ANSWER ------------
+  // ------------------ SUBMIT ANSWER ------------------
   const onSubmitAnswer = () => {
     if (!selectedBlock) return;
     if (hasAnswered) return;
@@ -128,7 +139,6 @@ export default function App() {
     }
 
     const latestBlock = pyramid.flat().find((b) => b.id === selectedBlock.id);
-
     if (!latestBlock || latestBlock.used) {
       setFeedback("This block is already used.");
       setHasAnswered(true);
@@ -138,7 +148,7 @@ export default function App() {
     const isCorrect = userAnswer === latestBlock.answer;
     setHasAnswered(true);
 
-    // Update block state
+    // update pyramid with block color + used flag
     setPyramid((prev) =>
       prev.map((row) =>
         row.map((b) =>
@@ -155,7 +165,7 @@ export default function App() {
       )
     );
 
-    // Award points
+    // award score
     if (isCorrect) {
       setTeams((prev) =>
         prev.map((t, idx) =>
@@ -172,7 +182,7 @@ export default function App() {
 
 
 
-  // ------------ CLOSE MODAL ------------
+  // ------------------ CLOSE MODAL ------------------
   const closeModal = () => {
     setSelectedBlockId(null);
     setAnswerInput("");
@@ -182,7 +192,7 @@ export default function App() {
 
 
 
-  // ------------ RESET BUTTONS ------------
+  // ------------------ RESET BUTTONS ------------------
   const resetScores = () => {
     const fresh = [
       { name: "Team A", score: 0 },
@@ -205,7 +215,7 @@ export default function App() {
 
 
 
-  // ------------ RENDER UI ------------
+  // ------------------ RENDER ------------------
   return (
     <div
       style={{
