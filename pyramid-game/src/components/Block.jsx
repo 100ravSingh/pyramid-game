@@ -1,10 +1,17 @@
 export default function Block({ block, onClick }) {
-  const bgColor =
-    block.status === "correct"
-      ? "#22c55e"      // green
-      : block.status === "wrong"
-      ? "#ef4444"      // red
-      : "#facc15";     // yellow
+  // Background colors
+  let bgColor = "#facc15"; // yellow (unused)
+
+  if (block.status === "teamA") bgColor = "#3b82f6";  // blue
+  if (block.status === "teamB") bgColor = "#ec4899";  // pink
+  if (block.status === "wrong") bgColor = "#ef4444";  // red
+
+  // Text color logic:
+  // 🔹 TEAM BLOCK → white text
+  // 🔹 WRONG BLOCK → white text
+  // 🔹 UNUSED YELLOW BLOCK → black text
+  const textColor =
+    block.status === null ? "black" : "white";
 
   return (
     <button
@@ -16,12 +23,22 @@ export default function Block({ block, onClick }) {
         borderRadius: 4,
         border: "1px solid #444",
         backgroundColor: bgColor,
-        fontSize: "10px",
+
+        // FINAL text color
+        color: textColor,
+
+        fontSize: "11px",
+        fontWeight: "bold",
         cursor: block.used ? "not-allowed" : "pointer",
+
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center",
       }}
       title={`Points: ${block.points}`}
     >
-      {block.used ? "✓" : block.points}
+      {block.randomNumber}
     </button>
   );
 }
