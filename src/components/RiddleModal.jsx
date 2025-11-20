@@ -6,7 +6,7 @@ export default function RiddleModal({
   feedback,
   onSubmit,
   onClose,
-  hasAnswered,
+  hasAnswered
 }) {
   if (!block) return null;
 
@@ -15,66 +15,97 @@ export default function RiddleModal({
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.6)",
+        background: "rgba(0,0,0,0.65)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        padding: "15px",
+        zIndex: 9999,
       }}
     >
       <div
         style={{
-          background: "#111827",
-          padding: 20,
-          borderRadius: 12,
-          width: "350px",
-          border: "1px solid #333",
+          background: "#1f2937",
+          padding: "20px",
+          borderRadius: "12px",
+          width: "clamp(300px, 80vw, 450px)",
+          color: "white",
+          boxShadow: "0 0 12px rgba(0,0,0,0.4)",
+          animation: "modalPop 0.25s ease",
         }}
       >
-        <h2>{activeTeam.name}</h2>
-        <p><b>Points:</b> {block.points}</p>
-        <p>{block.question}</p>
+        <h2 style={{ marginBottom: "10px", color: "#fbbf24" }}>
+          {activeTeam.name} — Solve the Riddle
+        </h2>
+
+        <p style={{ marginBottom: "15px", fontSize: "1.1rem" }}>
+          {block.question}
+        </p>
 
         <input
           type="text"
           value={answerInput}
           onChange={(e) => setAnswerInput(e.target.value)}
-          placeholder="Answer..."
+          placeholder="Type your answer..."
+          disabled={hasAnswered}
           style={{
             width: "100%",
-            padding: "8px",
-            borderRadius: "6px",
-            marginBottom: "8px",
-            background: "#000",
-            color: "#fff",
-            border: "1px solid #555"
+            padding: "10px",
+            borderRadius: "8px",
+            border: "1px solid #4b5563",
+            marginBottom: "10px",
+            fontSize: "1rem",
           }}
         />
 
-        {feedback && <p>{feedback}</p>}
+        {feedback && (
+          <p
+            style={{
+              marginBottom: "10px",
+              fontWeight: "700",
+              color:
+                feedback.startsWith("Correct") ? "#22c55e" : "#ef4444",
+            }}
+          >
+            {feedback}
+          </p>
+        )}
 
-        <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end" }}>
-            <button
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            marginTop: "10px",
+          }}
+        >
+          <button
             onClick={onSubmit}
             disabled={hasAnswered}
             style={{
-                padding: "6px 12px",
-                background: hasAnswered ? "#16a34a55" : "#22c55e",
-                borderRadius: "6px",
-                border: "none",
-                cursor: hasAnswered ? "not-allowed" : "pointer",
+              padding: "10px 16px",
+              background: "#3b82f6",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "700",
+              flex: 1,
+              marginRight: "10px",
+              opacity: hasAnswered ? 0.6 : 1,
             }}
-            >
-            {hasAnswered ? "Answered" : "Submit"}
-            </button>
+          >
+            Submit
+          </button>
 
           <button
             onClick={onClose}
             style={{
-              padding: "6px 12px",
-              background: "transparent",
-              borderRadius: "6px",
-              border: "1px solid #777",
-              color: "#fff",
+              padding: "10px 16px",
+              background: "#6b7280",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "700",
+              flex: 1,
             }}
           >
             Close

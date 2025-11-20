@@ -1,23 +1,27 @@
-// src/components/Footer.jsx
-
 export default function Footer() {
   return (
     <footer
       style={{
-        marginTop: "40px",
-        padding: "16px",
+        width: "100%",
+        padding: "12px 0",
         textAlign: "center",
-        color: "#9ca3af",
-        fontSize: "14px",
-        borderTop: "1px solid #374151",
+        background: "#0f172a",
+        color: "#e2e8f0",
+        fontSize: "0.9rem",
+        marginTop: "20px",
+        borderTop: "1px solid #1e293b",
       }}
     >
       Designed & Developed by{" "}
       <a
-        href="https://github.com/100ravSingh" 
+        href="https://github.com/100ravSingh"
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: "#fbbf24", textDecoration: "none", fontWeight: "bold" }}
+        style={{
+          color: "#38bdf8",
+          fontWeight: "700",
+          textDecoration: "none",
+        }}
       >
         Sourav Singh
       </a>

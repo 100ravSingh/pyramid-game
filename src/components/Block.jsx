@@ -1,40 +1,45 @@
+import { LAYER_COLORS } from "../pyramidConfig";
+
 export default function Block({ block, onClick }) {
-  // Background colors
-  let bgColor = "#facc15"; // yellow (unused)
+  
+  // -------------------------------
+  // Layer-based default color
+  // Difficulty: bottom → top
+  // -------------------------------
+  let bgColor = LAYER_COLORS[block.rowIndex];
 
-  if (block.status === "teamA") bgColor = "#3b82f6";  // blue
-  if (block.status === "teamB") bgColor = "#ec4899";  // pink
-  if (block.status === "wrong") bgColor = "#ef4444";  // red
+  // -------------------------------
+  // Override for team result colors
+  // -------------------------------
+  if (block.status === "teamA") bgColor = "#3b82f6";   // blue
+  if (block.status === "teamB") bgColor = "#ec4899";   // pink
+  if (block.status === "wrong") bgColor = "#ef4444";   // red
 
-  // Text color logic:
-  // 🔹 TEAM BLOCK → white text
-  // 🔹 WRONG BLOCK → white text
-  // 🔹 UNUSED YELLOW BLOCK → black text
-  const textColor =
-    block.status === null ? "black" : "white";
+  // Text color: black for default, white for team colors
+  const textColor = block.status === null ? "black" : "white";
 
   return (
     <button
       onClick={() => onClick(block)}
       disabled={block.used}
+      className="block-btn"
       style={{
-        width: 28,
-        height: 28,
-        borderRadius: 4,
-        border: "1px solid #444",
+        width: "clamp(32px, 4vw, 52px)",
+        height: "clamp(32px, 4vw, 52px)",
+        borderRadius: "6px",
+        border: "1px solid #374151",
         backgroundColor: bgColor,
-
-        // FINAL text color
         color: textColor,
-
-        fontSize: "11px",
-        fontWeight: "bold",
+        fontSize: "clamp(10px, 1.4vw, 18px)",
+        fontWeight: "700",
         cursor: block.used ? "not-allowed" : "pointer",
-
+        
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
         textAlign: "center",
+
+        transition: "0.15s ease-in-out",
       }}
       title={`Points: ${block.points}`}
     >

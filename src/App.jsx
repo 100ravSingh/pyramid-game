@@ -6,11 +6,13 @@ import Pyramid from "./components/Pyramid";
 import Scoreboard from "./components/Scoreboard";
 import RiddleModal from "./components/RiddleModal";
 
-import RIDDLE_LAYERS from "./riddleLayers";  // NEW
+import RIDDLE_LAYERS from "./riddleLayers";
 import { ROW_BLOCKS, ROW_POINTS } from "./pyramidConfig";
 
 
-// ------------------ CREATE BLOCKS (with layer-wise riddles) ------------------
+// ------------------------------------------------------
+// CREATE BLOCKS — generates correct bottom→top pyramid
+// ------------------------------------------------------
 function createBlocks() {
   let blocks = [];
   let id = 1;
@@ -18,13 +20,13 @@ function createBlocks() {
   ROW_BLOCKS.forEach((count, rowIndex) => {
     const row = [];
 
-    // Copy riddles for this layer so we can remove after assignment
+    // Copy riddles for this layer
     let available = [...RIDDLE_LAYERS[`layer${rowIndex}`]];
 
     for (let i = 0; i < count; i++) {
       const randomIndex = Math.floor(Math.random() * available.length);
       const r = available[randomIndex];
-      available.splice(randomIndex, 1); // remove to avoid repetition
+      available.splice(randomIndex, 1);
 
       row.push({
         id: id++,
@@ -34,9 +36,8 @@ function createBlocks() {
         points: ROW_POINTS[rowIndex],
 
         used: false,
-        status: null,    // teamA, teamB, wrong
+        status: null, // teamA, teamB, wrong
 
-        // random number 01–99
         randomNumber: String(Math.floor(Math.random() * 99) + 1).padStart(2, "0"),
       });
     }
@@ -49,15 +50,19 @@ function createBlocks() {
 
 
 
-// ------------------ MAIN APP COMPONENT ------------------
+// ------------------------------------------------------
+// MAIN APP COMPONENT
+// ------------------------------------------------------
 export default function App() {
 
-  // Detect first launch → so initial scores are 0:0
+  // Detect first launch → show score 0:0 once
   const isFirstLaunch = localStorage.getItem("firstTime") === null;
 
 
 
-  // ------------------ TEAM SCORES (persistent) ------------------
+  // ------------------------------------------------------
+  // TEAM SCORES (persistent)
+  // ------------------------------------------------------
   const [teams, setTeams] = useState(() => {
     const saved = localStorage.getItem("teamsScores");
 
@@ -65,7 +70,6 @@ export default function App() {
       return JSON.parse(saved);
     }
 
-    // first ever visit
     if (isFirstLaunch) {
       localStorage.setItem("firstTime", "no");
     }
@@ -82,10 +86,26 @@ export default function App() {
 
 
 
-  // ------------------ PYRAMID BLOCKS (persistent) ------------------
+  // ------------------------------------------------------
+  // PYRAMID BLOCKS (persistent + auto-fix if inverted)
+  // ------------------------------------------------------
   const [pyramid, setPyramid] = useState(() => {
     const saved = localStorage.getItem("pyramidState");
-    return saved ? JSON.parse(saved) : createBlocks();
+
+    if (saved) {
+      const parsed = JSON.parse(saved);
+
+      // ✔ Auto-fix inverted or wrong pyramid shapes
+      if (parsed.length !== ROW_BLOCKS.length) {
+        const fresh = createBlocks();
+        localStorage.setItem("pyramidState", JSON.stringify(fresh));
+        return fresh;
+      }
+
+      return parsed;
+    }
+
+    return createBlocks();
   });
 
   useEffect(() => {
@@ -94,9 +114,10 @@ export default function App() {
 
 
 
-  // ------------------ STATES ------------------
+  // ------------------------------------------------------
+  // STATES
+  // ------------------------------------------------------
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
-
   const [selectedBlockId, setSelectedBlockId] = useState(null);
   const [answerInput, setAnswerInput] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -109,13 +130,17 @@ export default function App() {
 
 
 
-  // ------------------ TEAM SWITCH ------------------
+  // ------------------------------------------------------
+  // SWITCH TEAM
+  // ------------------------------------------------------
   const switchTeam = () =>
     setActiveTeamIndex((prev) => (prev === 0 ? 1 : 0));
 
 
 
-  // ------------------ BLOCK CLICK ------------------
+  // ------------------------------------------------------
+  // CLICK BLOCK
+  // ------------------------------------------------------
   const handleBlockClick = (block) => {
     if (block.used) return;
 
@@ -127,7 +152,9 @@ export default function App() {
 
 
 
-  // ------------------ SUBMIT ANSWER ------------------
+  // ------------------------------------------------------
+  // SUBMIT ANSWER
+  // ------------------------------------------------------
   const onSubmitAnswer = () => {
     if (!selectedBlock) return;
     if (hasAnswered) return;
@@ -148,7 +175,7 @@ export default function App() {
     const isCorrect = userAnswer === latestBlock.answer;
     setHasAnswered(true);
 
-    // update pyramid with block color + used flag
+    // Update block status
     setPyramid((prev) =>
       prev.map((row) =>
         row.map((b) =>
@@ -157,7 +184,9 @@ export default function App() {
                 ...b,
                 used: true,
                 status: isCorrect
-                  ? (activeTeamIndex === 0 ? "teamA" : "teamB")
+                  ? activeTeamIndex === 0
+                    ? "teamA"
+                    : "teamB"
                   : "wrong",
               }
             : b
@@ -165,7 +194,7 @@ export default function App() {
       )
     );
 
-    // award score
+    // Score update
     if (isCorrect) {
       setTeams((prev) =>
         prev.map((t, idx) =>
@@ -182,7 +211,9 @@ export default function App() {
 
 
 
-  // ------------------ CLOSE MODAL ------------------
+  // ------------------------------------------------------
+  // CLOSE MODAL
+  // ------------------------------------------------------
   const closeModal = () => {
     setSelectedBlockId(null);
     setAnswerInput("");
@@ -192,7 +223,9 @@ export default function App() {
 
 
 
-  // ------------------ RESET BUTTONS ------------------
+  // ------------------------------------------------------
+  // RESET FUNCTIONS
+  // ------------------------------------------------------
   const resetScores = () => {
     const fresh = [
       { name: "Team A", score: 0 },
@@ -215,7 +248,9 @@ export default function App() {
 
 
 
-  // ------------------ RENDER ------------------
+  // ------------------------------------------------------
+  // RENDER UI
+  // ------------------------------------------------------
   return (
     <div
       style={{
@@ -243,6 +278,7 @@ export default function App() {
             justifyContent: "center",
             gap: "10px",
             margin: "15px 0",
+            flexWrap: "wrap",
           }}
         >
           <button
