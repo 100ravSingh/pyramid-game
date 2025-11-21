@@ -6,9 +6,9 @@ Designed & developed by **Sourav Singh**.
 
 ---
 
-## 🚀 Live Demo (Optional)
+## 🚀 Live Demo
 
-If deploying using GitHub Pages, add your link here:
+Game link:
 
 ```
 https://100ravSingh.github.io/pyramid-game
