@@ -11,21 +11,8 @@ Designed & developed by **Sourav Singh**.
 If deploying using GitHub Pages, add your link here:
 
 ```
-https://<username>.github.io/<repo-name>/
+https://100ravSingh.github.io/pyramid-game
 ```
-
----
-
-## 📸 Screenshots (Optional)
-
-Add screenshots here:
-
-```
-/screenshots/home.png
-/screenshots/modal.png
-/screenshots/pyramid.png
-```
-
 ---
 
 ## 🧠 Game Overview
