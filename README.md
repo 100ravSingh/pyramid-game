@@ -196,12 +196,4 @@ GitHub: [https://github.com/100ravSingh](https://github.com/100ravSingh)
 
 ---
 
-If you want, I can also generate:
-
-✔ Project Logo
-✔ Badges (build passing, stars, etc.)
-✔ GIF demo preview
-✔ Dark/Light theme toggle
-✔ Multi-player mode
-
 
