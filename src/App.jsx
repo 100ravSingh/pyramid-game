@@ -38,7 +38,7 @@ function createBlocks() {
         answer: r.a.toLowerCase(),
         points: ROW_POINTS[rowIndex],
         used: false,
-        status: null,
+        status: null, // teamA | teamB | wrong
         randomNumber: String(Math.floor(Math.random() * 99) + 1).padStart(2, "0"),
       });
     }
@@ -59,10 +59,7 @@ export default function App() {
 
   const [pyramid, setPyramid] = useState(() => {
     const saved = localStorage.getItem("pyramidState");
-    if (saved && JSON.parse(saved).length === ROW_BLOCKS.length) {
-      return JSON.parse(saved);
-    }
-    return createBlocks();
+    return saved ? JSON.parse(saved) : createBlocks();
   });
 
   const [activeTeamIndex, setActiveTeamIndex] = useState(0);
@@ -71,11 +68,12 @@ export default function App() {
   const [feedback, setFeedback] = useState("");
   const [hasAnswered, setHasAnswered] = useState(false);
 
-  /* ---------- CLOCK + GAME CONTROL ---------- */
+  /* ---------- CLOCK ---------- */
   const [timers, setTimers] = useState([INITIAL_TIME, INITIAL_TIME]);
   const [gameStarted, setGameStarted] = useState(false);
   const [clockPaused, setClockPaused] = useState(true);
 
+  /* ---------- GAME END ---------- */
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState(null);
   const [suddenDeath, setSuddenDeath] = useState(false);
@@ -96,12 +94,10 @@ export default function App() {
     const interval = setInterval(() => {
       setTimers((prev) => {
         const updated = [...prev];
+        updated[activeTeamIndex] -= 1;
 
-        if (updated[activeTeamIndex] > 0) {
-          updated[activeTeamIndex] -= 1;
-        }
-
-        if (updated[activeTeamIndex] === 0) {
+        if (updated[activeTeamIndex] <= 0) {
+          updated[activeTeamIndex] = 0;
           handleTimeExpired(activeTeamIndex, updated);
         }
 
@@ -191,32 +187,22 @@ export default function App() {
     );
 
     if (correct) {
-      setTeams((prev) => {
-        const updated = prev.map((t, i) =>
+      setTeams((prev) =>
+        prev.map((t, i) =>
           i === activeTeamIndex
             ? { ...t, score: t.score + selectedBlock.points }
             : t
-        );
-
-        if (
-          suddenDeath &&
-          updated[activeTeamIndex].score > targetScore
-        ) {
-          setWinner(updated[activeTeamIndex].name);
-          setGameOver(true);
-        }
-
-        return updated;
-      });
-
+        )
+      );
       setFeedback(`Correct! +${selectedBlock.points}`);
     } else {
       const penalty = Math.floor(selectedBlock.points / 2);
 
+      // ❗ Negative scores ALLOWED
       setTeams((prev) =>
         prev.map((t, i) =>
           i === activeTeamIndex
-            ? { ...t, score: Math.max(0, t.score - penalty) }
+            ? { ...t, score: t.score - penalty }
             : t
         )
       );
@@ -302,6 +288,7 @@ export default function App() {
             fontWeight: "800",
             background: gameStarted ? "#6b7280" : "#22c55e",
             border: "none",
+            cursor: gameStarted ? "not-allowed" : "pointer",
           }}
         >
           ▶ Start Game
