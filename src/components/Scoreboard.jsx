@@ -1,4 +1,11 @@
-export default function Scoreboard({ teams, activeTeamIndex, switchTeam }) {
+export default function Scoreboard({
+  teams,
+  timers,
+  formatTime,
+  activeTeamIndex,
+  suddenDeath,
+  gameOver,
+}) {
   return (
     <div
       style={{
@@ -11,56 +18,92 @@ export default function Scoreboard({ teams, activeTeamIndex, switchTeam }) {
     >
       {teams.map((team, idx) => {
         const isActive = idx === activeTeamIndex;
+        const isLowTime = timers[idx] <= 30 && timers[idx] > 0;
 
         return (
           <div
             key={idx}
             style={{
-              padding: "12px 20px",
-              borderRadius: "10px",
-              minWidth: "140px",
+              padding: "14px 22px",
+              borderRadius: "12px",
+              minWidth: "170px",
               textAlign: "center",
-              background: isActive ? "#2563eb" : "#1f2937", // Active = blue
+              background: isActive ? "#1d4ed8" : "#1f2937",
               color: "white",
+              border: isActive ? "2px solid #fbbf24" : "1px solid #374151",
               boxShadow: isActive
-                ? "0 0 12px rgba(37,99,235,0.8)"
-                : "0 0 5px rgba(0,0,0,0.4)",
-              transition: "0.2s ease-in-out",
+                ? "0 0 15px rgba(59,130,246,0.8)"
+                : "0 0 6px rgba(0,0,0,0.4)",
+              transition: "0.25s ease",
+              opacity: gameOver && isActive ? 0.85 : 1,
             }}
           >
-            <div style={{ fontSize: "1.2rem", fontWeight: "700" }}>
+            {/* Team Name */}
+            <div
+              style={{
+                fontSize: "1.2rem",
+                fontWeight: "800",
+                marginBottom: "4px",
+              }}
+            >
               {team.name}
             </div>
 
+            {/* Score */}
             <div
               style={{
-                fontSize: "1.6rem",
+                fontSize: "1.8rem",
                 fontWeight: "900",
-                marginTop: "6px",
+                marginBottom: "4px",
               }}
             >
               {team.score}
             </div>
 
-            {isActive && (
-              <button
-                onClick={switchTeam}
+            {/* Timer */}
+            <div
+              style={{
+                fontSize: "1.1rem",
+                fontWeight: "700",
+                color: isLowTime ? "#ef4444" : "#fbbf24",
+                animation: isLowTime ? "blink 1s infinite" : "none",
+              }}
+            >
+              ⏱ {formatTime(timers[idx])}
+            </div>
+
+            {/* Active indicator */}
+            {isActive && !gameOver && (
+              <div
                 style={{
-                  marginTop: "10px",
-                  padding: "6px 12px",
-                  borderRadius: "6px",
-                  border: "none",
-                  cursor: "pointer",
-                  background: "#fbbf24",
-                  fontWeight: "600",
+                  marginTop: "6px",
+                  fontSize: "0.85rem",
+                  fontWeight: "700",
+                  color: "#22c55e",
                 }}
               >
-                Switch Team
-              </button>
+                ▶ Your Turn
+              </div>
             )}
           </div>
         );
       })}
+
+      {/* Sudden Death Banner */}
+      {suddenDeath && !gameOver && (
+        <div
+          style={{
+            width: "100%",
+            textAlign: "center",
+            marginTop: "10px",
+            fontWeight: "900",
+            color: "#f87171",
+            fontSize: "1.1rem",
+          }}
+        >
+          ⚠ SUDDEN DEATH — Beat opponent’s score before time runs out
+        </div>
+      )}
     </div>
   );
 }
